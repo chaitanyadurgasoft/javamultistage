@@ -86,7 +86,7 @@ pipeline {
                             git config user.email "jenkins@example.com"
                             git add values.yaml
                             git commit -m "Update image tag to ${newTag}"
-                            git push https://${GIT_USER}:${GIT_PASS}@github.com/chaitanyadurgasoft/helmjavarepo.git HEAD:main
+                            git push https://${GIT_USER}:${GIT_PASS}@github.com/chaitanyadurgasoft/helmjavarepo.git HEAD:master
                             """
                         }
                     }
