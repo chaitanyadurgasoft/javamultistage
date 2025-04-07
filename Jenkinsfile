@@ -9,5 +9,17 @@ pipeline {
                 checkout scm
             }
         }
+        stage('check Docker') {
+            steps {
+        script {
+            try {
+                sh 'docker --version'
+                sh 'docker ps'
+            } catch (e) {
+                error "Docker is not installed or not running."
+            }
+        }
+        }
+    }
     }
 }
