@@ -68,12 +68,11 @@ pipeline {
             steps {
                 script {
                     def newTag = "v17${env.BUILD_NUMBER}"
-                    def chartRepo = "https://github.com/chaitanyadurgasoft/helmjavarepo.git"
         
                     // Clean clone the Helm repo into a subdirectory
-                    sh "rm -rf helmrepo && mkdir helmrepo"
+                    sh "rm -rf helmrepo"
+                     sh "git clone -b master https://github.com/chaitanyadurgasoft/helmjavarepo.git helmrepo"
                     dir('helmrepo') {
-                        git url: chartRepo, branch: 'main'
         
                         // Update the tag in values.yaml
                         sh """
