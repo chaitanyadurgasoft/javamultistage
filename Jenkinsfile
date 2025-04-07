@@ -98,7 +98,7 @@ pipeline {
         }
         stage('Deploy via Argo CD (Create or Sync)') {
             agent {
-                label 'k8smaster'
+                label 'k8smgmt'
             }
             steps {
                 script {
