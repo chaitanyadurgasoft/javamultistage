@@ -38,7 +38,7 @@ pipeline {
                 }
             }
         }
-         stage('Push to Harbor') {
+        stage('Push to Harbor') {
             steps {
                 script {
                     echo 'Tagging and pushing Docker image to Harbor...'
@@ -60,6 +60,36 @@ pipeline {
                         sh 'sudo docker logout harbor.testcgit.xyz'
                     } catch (e) {
                         error 'Failed to push Docker image to Harbor.'
+                    }
+                }
+            }
+        }
+        stage('Update values.yaml with image tag') {
+            steps {
+                script {
+                    def newTag = "v17${env.BUILD_NUMBER}"
+                    def chartRepo = "https://github.com/chaitanyadurgasoft/helmjavarepo.git"
+        
+                    // Clean clone the Helm repo into a subdirectory
+                    sh "rm -rf helmrepo && mkdir helmrepo"
+                    dir('helmrepo') {
+                        git url: chartRepo, branch: 'main'
+        
+                        // Update the tag in values.yaml
+                        sh """
+                        sed -i 's/^  tag: .*/  tag: ${newTag}/' values.yaml
+                        """
+        
+                        // Commit & push the change
+                        withCredentials([usernamePassword(credentialsId: 'git-creds-helm', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_PASS')]) {
+                            sh """
+                            git config user.name "jenkins"
+                            git config user.email "jenkins@example.com"
+                            git add values.yaml
+                            git commit -m "Update image tag to ${newTag}"
+                            git push https://${GIT_USER}:${GIT_PASS}@github.com/chaitanyadurgasoft/helmjavarepo.git HEAD:main
+                            """
+                        }
                     }
                 }
             }
