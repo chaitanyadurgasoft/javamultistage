@@ -13,8 +13,8 @@ pipeline {
             steps {
         script {
             try {
-                sh 'docker --version'
-                sh 'docker ps'
+                sh 'sudo docker --version'
+                sh 'sudo docker ps'
             } catch (e) {
                 error "Docker is not installed or not running."
             }
