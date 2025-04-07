@@ -30,8 +30,8 @@ pipeline {
                     echo '🐳 Building Docker image...'
                     try {
                         def imageTag = "javaapp:v17${env.BUILD_NUMBER}"
-                        sh 'sudo docker build -t ${imageTag} -f multistageDockerfile .'
-                        sh 'sudo docker images'
+                        sh "sudo docker build -t ${imageTag} -f multistageDockerfile ."
+                        sh "sudo docker images"
                     } catch (e) {
                         error '❌ Docker image build failed. Check the logs.'
                     }
