@@ -97,49 +97,48 @@ pipeline {
             }
         }
         stage('Deploy via Argo CD (Create or Sync)') {
-    agent {
-        label 'k8smaster'
-    }
-    steps {
-        script {
-            def appName = "javaapp"
-            def repoUrl = "https://github.com/chaitanyadurgasoft/helmjavarepo.git"
-            def destNamespace = "default"
-            def destCluster = "https://kubernetes.default.svc"
+            agent {
+                label 'k8smaster'
+            }
+            steps {
+                script {
+                    def appName = "javaapp"
+                    def repoUrl = "https://github.com/chaitanyadurgasoft/helmjavarepo.git"  // Update this to your repo
+                    def destNamespace = "default"
+                    def destCluster = "https://kubernetes.default.svc"
 
-            echo "🚀 Deploying or updating Argo CD app '${appName}'..."
+                    echo "Deploying or updating Argo CD app '${appName}'..."
 
-            withCredentials([usernamePassword(credentialsId: 'argocd-creds', usernameVariable: 'ARGOCD_USER', passwordVariable: 'ARGOCD_PASS')]) {
-                // Add Argo CD path
-                withEnv(["PATH+ARGOCD=/usr/local/bin"]) {
-                    sh """
-                        argocd login 3.239.26.128:30987 --username \$ARGOCD_USER --password \$ARGOCD_PASS --insecure
-                    """
-
-                    def checkApp = sh(script: "argocd app get ${appName}", returnStatus: true)
-
-                    if (checkApp != 0) {
-                        echo "🆕 Argo CD app '${appName}' not found. Creating it..."
+                    withCredentials([usernamePassword(credentialsId: 'argocd-creds', usernameVariable: 'ARGOCD_USER', passwordVariable: 'ARGOCD_PASS')]) {
+                        // Login
                         sh """
-                            argocd app create ${appName} \
+                        /usr/local/bin/argocd login 3.239.26.128:30987 --username \$ARGOCD_USER --password \$ARGOCD_PASS --insecure
+                        """
+
+                        // Check if app exists
+                        def checkApp = sh(script: "argocd app get ${appName}", returnStatus: true)
+
+                        if (checkApp != 0) {
+                            echo "🆕 Argo CD app '${appName}' not found. Creating it..."
+                            sh """
+                            /usr/local/bin/argocd app create ${appName} \
                                 --repo ${repoUrl} \
+                                 --path . \
                                 --dest-server ${destCluster} \
                                 --dest-namespace ${destNamespace} \
-                                --path . \
                                 --sync-policy automated \
                                 --insecure
-                        """
-                    } else {
-                        echo "✅ Argo CD app '${appName}' already exists. Proceeding to sync..."
-                    }
+                            """
+                        } else {
+                            echo "✅ Argo CD app '${appName}' already exists. Proceeding to sync..."
+                        }
 
-                    sh "argocd app sync ${appName}"
-                    sh "argocd app wait ${appName} --health --operation --timeout 300"
+                        // Sync the app
+                        sh "/usr/local/bin/argocd app sync ${appName}"
+                        sh "/usr/local/bin/argocd app wait ${appName} --health --operation --timeout 300"
+                    }
                 }
             }
         }
-    }
-}
-
     }
 }
