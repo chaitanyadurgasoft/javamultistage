@@ -14,5 +14,10 @@ pipeline {
             dependencyCheck additionalArguments: '--scan .', odcInstallation: 'default'
             }
         }
+        stage('Publish Report') {
+            steps {
+                dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
+                }
+        }
     }
 }
