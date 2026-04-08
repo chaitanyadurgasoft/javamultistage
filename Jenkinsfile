@@ -9,6 +9,10 @@ pipeline {
                 checkout scm
             }
         }
-
+        stage('OWASP Scan'){
+            steps {
+            dependencyCheck additionalArguments: '--scan .', odcInstallation: 'default'
+            }
+        }
     }
 }
